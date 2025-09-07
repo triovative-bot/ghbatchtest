@@ -10,3 +10,5 @@ jobs:
         run: echo "Hello GitHub Actions!"
       - name: Print message 2
         run: echo "Hello User "
+      - name: Print mesg like step 3
+        run: echo "clear gaurav query"
