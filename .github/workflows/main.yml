@@ -3,11 +3,11 @@ name: Hello World
 on: [push]
 env:
   name: Bala
+  desig: Architect
+  company: capgemini
 jobs:
   hello:
     runs-on: ubuntu-latest
-    env:
-      desig: Architect
     steps:
       - name: Print message
         run: echo "Hello $name"
@@ -15,5 +15,4 @@ jobs:
         run: echo "Your designation is $desig "
       - name: Print mesg like step 3
         run: echo "You are going to join at $company"
-        env:
-          company: capgemini
+          
