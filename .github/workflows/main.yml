@@ -1,10 +1,7 @@
 name: Hello World
 
 on: [push]
-env:
-  name: Bala
-  desig: Architect
-  company: capgemini
+
 jobs:
   hello:
     runs-on: ubuntu-latest
