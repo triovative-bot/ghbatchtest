@@ -7,9 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Print message
-        run: echo "Hello $name"
+        run: echo "Hello ${{ vars.NAME }}"
       - name: Print message 2
-        run: echo "Your designation is $desig "
+        run: echo "Your designation is ${{ vars.DESIG }} "
       - name: Print mesg like step 3
-        run: echo "You are going to join at $company"
+        run: echo "You are going to join at ${{ vars.COMPANY }}"
           
