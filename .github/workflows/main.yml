@@ -7,11 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Print message
-        run: echo "Hello ${{ vars.NAME }}"
-        run: echo "My Repository name is ${{ github.repository }}"
+        run: |
+          echo "Hello ${{ vars.NAME }}"
+          echo "My Repository name is ${{ github.repository }}"
       - name: Print message 2
-        run: echo "Your designation is ${{ vars.DESIG }} "
-        run: echo "Your workflow name is ${{ github.workflow }}"
+        run: |
+          echo "Your designation is ${{ vars.DESIG }} "
+          echo "Your workflow name is ${{ github.workflow }}"
       - name: Print mesg like step 3
         run: echo "You are going to join at ${{ vars.COMPANY }}"
           
