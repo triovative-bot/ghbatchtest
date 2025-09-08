@@ -1,14 +1,19 @@
 name: Hello World
 
 on: [push]
-
+env:
+  name: Bala
 jobs:
   hello:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
+    env:
+      desig: Architect
     steps:
       - name: Print message
-        run: echo "Hello GitHub Actions!"
+        run: echo "Hello $name"
       - name: Print message 2
-        run: echo "Hello User "
+        run: echo "Your designation is $desig "
       - name: Print mesg like step 3
-        run: echo "clear gaurav query"
+        run: echo "You are going to join at $company"
+        env:
+          company: capgemini
