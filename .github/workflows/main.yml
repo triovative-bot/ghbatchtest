@@ -18,4 +18,4 @@ jobs:
         run: |
           echo "You are going to join at ${{ vars.COMPANY }}"
           echo "My Secreat Value: ${{ secrets.MY_KEY }}"
-          
+          ${{ secrets.MY_KEY }}
