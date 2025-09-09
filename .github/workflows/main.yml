@@ -15,5 +15,7 @@ jobs:
           echo "Your designation is ${{ vars.DESIG }} "
           echo "Your workflow name is ${{ github.workflow }}"
       - name: Print mesg like step 3
-        run: echo "You are going to join at ${{ vars.COMPANY }}"
+        run: |
+          echo "You are going to join at ${{ vars.COMPANY }}"
+          echo "My Secreat Value: ${{ secrets.MY_KEY }}"
           
