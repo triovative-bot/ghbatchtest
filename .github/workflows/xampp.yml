@@ -30,7 +30,6 @@ jobs:
             chmod +x /tmp/xampp-installer.run
             sudo /tmp/xampp-installer.run --mode unattended
             echo "XAMPP installed successfully."
-
             # Start XAMPP service
             sudo /opt/lampp/lampp start
             echo "XAMPP started."
