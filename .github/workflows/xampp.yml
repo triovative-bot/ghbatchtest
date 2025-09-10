@@ -1,0 +1,36 @@
+name: Install XAMPP on Ubuntu Server
+
+on:
+  workflow_dispatch:
+    inputs:
+      server:
+        description: "Target server hostname or IP"
+        required: true
+      user:
+        description: "SSH username"
+        required: true
+
+jobs:
+  install-xampp:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install XAMPP on server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ github.event.inputs.server }}
+          username: ${{ github.event.inputs.user }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Downloading and installing XAMPP..."
+            wget https://www.apachefriends.org/xampp-files/8.2.12/xampp-linux-x64-8.2.12-0-installer.run -O /tmp/xampp-installer.run
+            chmod +x /tmp/xampp-installer.run
+            sudo /tmp/xampp-installer.run --mode unattended
+            echo "XAMPP installed successfully."
+
+            # Start XAMPP service
+            sudo /opt/lampp/lampp start
+            echo "XAMPP started."
