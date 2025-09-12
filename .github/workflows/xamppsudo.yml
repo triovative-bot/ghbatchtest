@@ -1,19 +1,24 @@
-- name: SSH to server
-  on: [workflow_dispatch]
-  uses: appleboy/ssh-action@v0.1.10
-  with:
-    host: ${{ secrets.HOST }}
-    username: ${{ secrets.USERNAME }}
-    key: ${{ secrets.SSH_PRIVATE_KEY }}
-    password: ${{ secrets.UDO_PASSWORD }}  # Add sudo password
-    port: 22
-    script: |
-      echo "Downloading and installing XAMPP..."
-      echo "${{ secrets.UDO_PASSWORD }}" | sudo -S apt-get update
-      echo "${{ secrets.UDO_PASSWORD }}" | sudo -S apt-get install -y curl
-      chmod +x /tmp/xampp-linux-x64-8.0.30-0-installer.run
-      echo "${{ secrets.UDO_PASSWORD }}" | sudo -S /tmp/xampp-linux-x64-8.0.30-0-installer.run --mode unattended
-      echo "XAMPP installed successfully."
-      # Start XAMPP service
-      echo "${{ secrets.UDO_PASSWORD }}" | sudo -S /opt/lampp/lampp start
-      echo "XAMPP started."
+name: Install XAMPP on Ubuntu Server
+on: [workflow_dispatch]
+jobs:
+  install-xampp:
+    runs-on: self-hosted
+    steps:
+      - name: Install XAMPP on server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.UDO_PASSWORD }}  # Add sudo password
+          port: 22
+          script: |
+            echo "Downloading and installing XAMPP..."
+            echo "${{ secrets.UDO_PASSWORD }}" | sudo -S apt-get update
+            echo "${{ secrets.UDO_PASSWORD }}" | sudo -S apt-get install -y curl
+            chmod +x /tmp/xampp-linux-x64-8.0.30-0-installer.run
+            echo "${{ secrets.UDO_PASSWORD }}" | sudo -S /tmp/xampp-linux-x64-8.0.30-0-installer.run --mode unattended
+            echo "XAMPP installed successfully."
+            # Start XAMPP service
+            echo "${{ secrets.UDO_PASSWORD }}" | sudo -S /opt/lampp/lampp start
+            echo "XAMPP started."
