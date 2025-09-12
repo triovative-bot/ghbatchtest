@@ -1,4 +1,5 @@
 - name: SSH to server
+  on: [workflow_dispatch]
   uses: appleboy/ssh-action@v0.1.10
   with:
     host: ${{ secrets.HOST }}
