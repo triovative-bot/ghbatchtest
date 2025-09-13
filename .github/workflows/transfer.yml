@@ -19,14 +19,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       - name: Lists Files
-        uses: |
-            pwd 
-            ls -al
+        run: |
+          pwd 
+          ls -al
       - name: Transfer folder via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ github.event.inputs.server }}
           username: ${{ github.event.inputs.user }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "./"
+          source: "./index.html"
           target: ${{ github.event.inputs.target_path }}
