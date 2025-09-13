@@ -1,0 +1,32 @@
+name: Transfer Folder to Server
+on:
+  workflow_dispatch:
+    inputs:
+      server:
+        description: "Target server hostname or IP"
+        required: true
+      user:
+        description: "SSH username"
+        required: true
+      target_path:
+        description: "Destination path on server"
+        required: true
+        default: "/data"
+jobs:
+  transfer:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Lists Files
+        uses: |
+            pwd 
+            ls -al
+      - name: Transfer folder via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ github.event.inputs.server }}
+          username: ${{ github.event.inputs.user }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "./"
+          target: ${{ github.event.inputs.target_path }}
