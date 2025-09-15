@@ -1,8 +1,14 @@
-
 name: Deploy file from another repo via SSH key
 
 on:
   workflow_dispatch:
+    inputs:
+      server_ip:
+        description: "Target server IP"
+        required: true
+      server_user:
+        description: "Target server username"
+        required: true
 
 jobs:
   deploy:
@@ -11,27 +17,34 @@ jobs:
     steps:
       - name: Checkout Repo A (current repo)
         uses: actions/checkout@v3
-        
-      - name: Checkout Repo B (private)
+
+      - name: Checkout Repo B (private via GitHub deploy key)
         uses: actions/checkout@v3
         with:
           repository: triovative-bot/daypredict
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          ref: main          # 👈 force main branch
+          ssh-key: ${{ secrets.GH_DEPLOY_KEY }}   # 👈 deploy key for GitHub
+          ref: main
           path: repo-b
           persist-credentials: false
-          ssh-strict: false   # avoid known_hosts issues
+          ssh-strict: false
 
       - name: Debug (list files from Repo B)
         run: ls -R repo-b
 
+      - name: Test SSH connection to server
+        run: |
+          echo "${{ secrets.SERVER_SSH_KEY }}" > id_rsa
+          chmod 600 id_rsa
+          ssh -o StrictHostKeyChecking=no -i id_rsa ${{ github.event.inputs.server_user }}@${{ github.event.inputs.server_ip }} "echo Connected OK"
+
       - name: Copy file from Repo B to server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}    # server SSH key
+          host: ${{ github.event.inputs.server_ip }}
+          username: ${{ github.event.inputs.server_user }}
+          key: ${{ secrets.SERVER_SSH_KEY }}     # 👈 key for target server
           port: 22
           source: "repo-b/index.php"
           target: "/data"
           overwrite: true
+          debug: true
