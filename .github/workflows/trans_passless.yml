@@ -1,49 +1,36 @@
-name: Deploy file from Repo B to server
+name: Deploy file from another repo via SSH key
 
 on:
   workflow_dispatch:
-    inputs:
-      server:
-        description: "Target server hostname or IP"
-        required: true
-      user:
-        description: "SSH username for target server"
-        required: true
 
 jobs:
   deploy:
     runs-on: self-hosted
 
     steps:
-      - name: Debug SSH to GitHub
-        run: ssh -T git@github.com || true
-        env:
-          GIT_SSH_COMMAND: "ssh -i ${{ secrets.REPO_B_SSH_KEY }} -o StrictHostKeyChecking=no"
-
       - name: Checkout Repo A (current repo)
         uses: actions/checkout@v3
-
-      - name: Checkout Repo B
+        
+      - name: Checkout Repo B (private)
         uses: actions/checkout@v3
         with:
           repository: triovative-bot/daypredict
           ssh-key: ${{ secrets.REPO_B_SSH_KEY }}
-          ref: main
+          ref: main          # 👈 force main branch
           path: repo-b
-          ssh-strict: false   # 👈 avoid host key verification blocking
           persist-credentials: false
-
+          ssh-strict: false   # avoid known_hosts issues
 
       - name: Debug (list files from Repo B)
         run: ls -R repo-b
 
-      - name: Transfer file to target server
+      - name: Copy file from Repo B to server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ github.event.inputs.server }}   # 👈 runtime input
-          username: ${{ github.event.inputs.user }} # 👈 runtime input
-          key: ${{ secrets.SSH_PRIVATE_KEY }}               # private key for server
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}    # server SSH key
           port: 22
-          source: "./index.php"     # 👈 adjust file path
+          source: "repo-b/path/to/file"
           target: "/data"
           overwrite: true
