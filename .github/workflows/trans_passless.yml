@@ -23,6 +23,7 @@ jobs:
         with:
           repository: triovative-bot/daypredict     # 👈 change this
           ssh-key: ${{ secrets.REPO_B_SSH_KEY }}
+          ref: main
           path: repo-b
 
       - name: Debug (list files from Repo B)
