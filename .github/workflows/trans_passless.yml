@@ -1,39 +1,33 @@
-name: Deploy file from another repo via SSH key
-
-on:
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    runs-on: self-hosted
-
-    steps:
-      - name: Checkout Repo A (current repo)
-        uses: actions/checkout@v3
-
-      - name: Setup SSH for Repo B (daypredict)
-        run: |
-          echo "${{ secrets.REPO_B_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-
-      - name: Checkout Repo B
-        uses: actions/checkout@v3
-        with:
-          repository: triovative-bot/daypredict
-          ssh-key: ${{ secrets.REPO_B_SSH_KEY }}   # 👈 use SSH key instead of PAT
-          path: repo-b
-
-      - name: Debug (list files from Repo B)
-        run: ls -R repo-b
-
-      - name: Copy file from Repo B to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}    # server SSH key
-          port: 22
-          source: "./*"
-          target: "/data"
-          overwrite: true
+  name: Deploy file from another repo via SSH key
+  
+  on:
+    workflow_dispatch:
+  
+  jobs:
+    deploy:
+      runs-on: self-hosted
+  
+      steps:
+        - name: Checkout Repo A (current repo)
+          uses: actions/checkout@v3
+          
+        - name: Checkout Repo B
+          uses: actions/checkout@v3
+          with:
+            repository: triovative-bot/daypredict
+            ssh-key: ${{ secrets.REPO_B_SSH_KEY }}   # 👈 use SSH key instead of PAT
+            path: repo-b
+  
+        - name: Debug (list files from Repo B)
+          run: ls -R repo-b
+  
+        - name: Copy file from Repo B to server
+          uses: appleboy/scp-action@v0.1.7
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USER }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}    # server SSH key
+            port: 22
+            source: "./*"
+            target: "/data"
+            overwrite: true
