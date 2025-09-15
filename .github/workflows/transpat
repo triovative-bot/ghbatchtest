@@ -26,8 +26,8 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: "repo-b/path/to/yourfile.txt"   # path inside checked out repo
-          target: "/home/${{ secrets.USER }}/daypredict/"
+          source: "repo-b/index.php"   # path inside checked out repo
+          target: "/data"
           overwrite: true
