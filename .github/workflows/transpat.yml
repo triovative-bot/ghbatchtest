@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  deploywithpat:
     runs-on: self-hosted   # since you’re using your own runner
 
     steps:
