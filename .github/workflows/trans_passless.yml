@@ -32,6 +32,6 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}    # server SSH key
           port: 22
-          source: "./index.php"
+          source: "repo-b/index.php"
           target: "/data"
           overwrite: true
