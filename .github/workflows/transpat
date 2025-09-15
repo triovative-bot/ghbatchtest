@@ -1,0 +1,33 @@
+name: Deploy file from another repo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted   # since you’re using your own runner
+
+    steps:
+      - name: Checkout from phbatchtest
+        uses: actions/checkout@v3
+
+      - name: Checkout from daypredict
+        uses: actions/checkout@v3
+        with:
+          repository: triovative-bot/daypredict         # change this
+          path: repo-b                            # checkout into subfolder
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Debug (list files)
+        run: ls -R repo-b
+
+      - name: Copy file from Repo B to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          source: "repo-b/path/to/yourfile.txt"   # path inside checked out repo
+          target: "/home/${{ secrets.USER }}/daypredict/"
+          overwrite: true
