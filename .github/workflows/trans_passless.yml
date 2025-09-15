@@ -23,13 +23,16 @@ jobs:
       - name: Checkout Repo A (current repo)
         uses: actions/checkout@v3
 
-      - name: Checkout Repo B using SSH key
+      - name: Checkout Repo B
         uses: actions/checkout@v3
         with:
-          repository: triovative-bot/daypredict     # 👈 change this
+          repository: triovative-bot/daypredict
           ssh-key: ${{ secrets.REPO_B_SSH_KEY }}
           ref: main
           path: repo-b
+          ssh-strict: false   # 👈 avoid host key verification blocking
+          persist-credentials: false
+
 
       - name: Debug (list files from Repo B)
         run: ls -R repo-b
