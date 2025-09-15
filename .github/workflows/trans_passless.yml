@@ -1,3 +1,4 @@
+
 name: Deploy file from another repo via SSH key
 
 on:
@@ -31,6 +32,6 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}    # server SSH key
           port: 22
-          source: "repo-b/path/to/file"
+          source: "./index.php"
           target: "/data"
           overwrite: true
