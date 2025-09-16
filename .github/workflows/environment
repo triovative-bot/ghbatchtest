@@ -1,0 +1,63 @@
+name: Deploy file from another repo via SSH key
+
+on:
+  workflow_dispatch:
+    inputs:
+      server_ip:
+        description: "Target server IP"
+        required: true
+      server_user:
+        description: "Target server username"
+        required: true
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    environment: development   # 👈 environment added
+
+    steps:
+      - name: Checkout Repo A (current repo)
+        uses: actions/checkout@v3
+
+      - name: Checkout Repo B (private via GitHub deploy key)
+        uses: actions/checkout@v3
+        with:
+          repository: triovative-bot/daypredict
+          ssh-key: ${{ secrets.GH_DEPLOY_KEY }}   # 👈 deploy key for GitHub
+          ref: main
+          path: repo-b
+          persist-credentials: false
+          ssh-strict: false
+
+      - name: Debug (list files from Repo B)
+        run: ls -R repo-b
+
+      - name: Upload Repo B artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo-b-artifact
+          path: repo-b/index.php   # 👈 package the file
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: repo-b-artifact
+          path: ./artifact
+
+      - name: Test SSH connection to server
+        run: |
+          echo "${{ secrets.SERVER_SSH_KEY }}" > id_rsa
+          chmod 600 id_rsa
+          ssh -o StrictHostKeyChecking=no -i id_rsa ${{ github.event.inputs.server_user }}@${{ github.event.inputs.server_ip }} "echo Connected OK"
+
+      - name: Deploy artifact to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ github.event.inputs.server_ip }}
+          username: ${{ github.event.inputs.server_user }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          source: "./artifact/index.php"   # 👈 from artifact
+          target: "/data"
+          overwrite: true
+          debug: true
