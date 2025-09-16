@@ -1,0 +1,67 @@
+name: Deploy file from another repo via SSH key
+
+on:
+  workflow_dispatch:
+    inputs:
+      server_ip:
+        description: "Target server IP"
+        required: true
+      server_user:
+        description: "Target server username"
+        required: true
+
+jobs:
+  build-artifact:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repo B (private via GitHub deploy key)
+        uses: actions/checkout@v3
+        with:
+          repository: triovative-bot/daypredict
+          ssh-key: ${{ secrets.GH_DEPLOY_KEY }}   # 👈 deploy key for GitHub
+          ref: main
+          path: repo-b
+          persist-credentials: false
+          ssh-strict: false
+
+      - name: Archive artifact
+        run: |
+          mkdir -p artifact
+          cp repo-b/index.php artifact/
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: deploy-artifact
+          path: artifact/
+
+  deploy:
+    runs-on: self-hosted
+    needs: build-artifact
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: deploy-artifact
+          path: artifact
+
+      - name: Test SSH connection
+        run: |
+          echo "${{ secrets.SERVER_SSH_KEY }}" > id_rsa
+          chmod 600 id_rsa
+          ssh -o StrictHostKeyChecking=no -i id_rsa \
+            ${{ github.event.inputs.server_user }}@${{ github.event.inputs.server_ip }} "echo Connected OK"
+
+      - name: Copy artifact to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ github.event.inputs.server_ip }}
+          username: ${{ github.event.inputs.server_user }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 22
+          source: "artifact/index.php"
+          target: "/data"
+          overwrite: true
+          debug: true
