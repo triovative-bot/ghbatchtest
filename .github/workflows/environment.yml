@@ -13,7 +13,7 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
-    environment: production   # 👈 environment added
+    environment: development   # 👈 environment added
 
     steps:
       - name: Checkout Repo A (current repo)
