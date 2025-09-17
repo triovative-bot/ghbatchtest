@@ -27,13 +27,13 @@ jobs:
           repository: triovative-bot/daypredict
           ssh-key: ${{ secrets.GH_DEPLOY_KEY }}   # 👈 deploy key for GitHub
           ref: main
-          path: .
+          path: web
           persist-credentials: false
           ssh-strict: false
 
       - name: Archive Website Code
         run: |
-          tar -czf website.tar.gz -C website .
+          tar -czf website.tar.gz -C web/website .
 
       - name: Upload Website Artifact
         uses: actions/upload-artifact@v4
