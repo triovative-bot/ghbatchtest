@@ -61,11 +61,11 @@ jobs:
         run: |
           echo "${{ secrets.SERVER_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r * ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/opt/lampp/htdocs/
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r * ${{ github.event.inputs.server_user }}@${{ github.event.inputs.server_ip }}:/opt/lampp/htdocs/
 
       - name: Restart Apache in XAMPP
         run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ github.event.inputs.server_user }}@${{ github.event.inputs.server_ip }} \
             "sudo /opt/lampp/lampp restartapache"
 
   test:
