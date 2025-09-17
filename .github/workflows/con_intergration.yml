@@ -1,0 +1,82 @@
+name: CI for XAMPP Web Server
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:   # allow manual trigger
+    inputs:
+      server_ip:
+        description: "Target server IP"
+        required: true
+      server_user:
+        description: "Target server username"
+        required: true
+
+jobs:
+  build:
+    name: Build Stage - Checkout Repositories
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repo A (CI pipeline repo)
+        uses: actions/checkout@v3
+
+      - name: Checkout Repo B (private via GitHub deploy key)
+        uses: actions/checkout@v3
+        with:
+          repository: triovative-bot/daypredict
+          ssh-key: ${{ secrets.GH_DEPLOY_KEY }}   # 👈 deploy key for GitHub
+          ref: main
+          path: .
+          persist-credentials: false
+          ssh-strict: false
+
+      - name: Archive Website Code
+        run: |
+          tar -czf website.tar.gz -C website .
+
+      - name: Upload Website Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: website-code
+          path: website.tar.gz
+
+  deploy:
+    name: Deploy Stage - Transfer to XAMPP Server
+    runs-on: self-hosted
+    needs: build
+
+    steps:
+      - name: Download Website Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: website-code
+          path: .
+
+      - name: Extract Artifact
+        run: |
+          tar -xzf website.tar.gz
+
+      - name: Copy Files to XAMPP Server via SSH
+        run: |
+          echo "${{ secrets.SERVER_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r * ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/opt/lampp/htdocs/
+
+      - name: Restart Apache in XAMPP
+        run: |
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
+            "sudo /opt/lampp/lampp restartapache"
+
+  test:
+    name: Test Stage - Validate Website
+    runs-on: self-hosted
+    needs: deploy
+
+    steps:
+      - name: Wait for Web Server
+        run: sleep 10
+
+      - name: Test Website URL
+        run: |
+          curl -I http://${{ secrets.SERVER_IP }} | grep "200 OK" || exit 1
