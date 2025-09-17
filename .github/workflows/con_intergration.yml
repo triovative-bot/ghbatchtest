@@ -5,12 +5,8 @@ on:
     branches: [ "main" ]
   workflow_dispatch:   # allow manual trigger
     inputs:
-      server_ip:
-        description: "Target server IP"
-        required: true
-      server_user:
-        description: "Target server username"
-        required: true
+      server_ip: "192.168.1.9"
+      server_user: "bala"
 
 jobs:
   build:
