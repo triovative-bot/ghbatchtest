@@ -4,9 +4,6 @@ on:
   push:
     branches: [ "main" ]
   workflow_dispatch:   # allow manual trigger
-    inputs:
-      server_ip: "192.168.1.9"
-      server_user: "bala"
 
 jobs:
   build:
@@ -57,11 +54,11 @@ jobs:
         run: |
           echo "${{ secrets.SERVER_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
-          scp -i private_key.pem -o StrictHostKeyChecking=no -r * ${{ github.event.inputs.server_user }}@${{ github.event.inputs.server_ip }}:/opt/lampp/htdocs/
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r * ${{ secrets.USERNAME }}@${{ gsecrets.HOST }}:/opt/lampp/htdocs/
 
       - name: Restart Apache in XAMPP
         run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ github.event.inputs.server_user }}@${{ github.event.inputs.server_ip }} \
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ gsecrets.HOST }} \
             "sudo /opt/lampp/lampp restartapache"
 
   test:
