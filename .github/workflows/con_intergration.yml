@@ -55,13 +55,12 @@ jobs:
           echo "${{ secrets.SERVER_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
           scp -i private_key.pem -o StrictHostKeyChecking=no -r * ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/lampp/htdocs/
-      
-
-      - name: Restart Apache in XAMPP
+      - name: Deploy and restart Apache
         run: |
           ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} \
-            "echo '${{ secrets.SUDO_PASS }}' | sudo -S mv -i /opt/lampp/htdocs/website/* /opt/lampp/htdocs/ && \
-            echo '${{ secrets.SUDO_PASS }}' | sudo -S /opt/lampp/lampp restartapache"
+          "sudo mv -i /opt/lampp/htdocs/website/* /opt/lampp/htdocs/ && \
+           sudo /opt/lampp/lampp restartapache"
+
 
   test:
     name: Test Stage - Validate Website
