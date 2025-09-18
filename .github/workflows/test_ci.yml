@@ -1,0 +1,72 @@
+name: CI for XAMPP Web Server
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:   # allow manual trigger
+
+jobs:
+  build:
+    name: Build Stage - Checkout Repositories
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout Repo A (CI pipeline repo)
+        uses: actions/checkout@v4
+
+      - name: Checkout Website Code Repo (Private)
+        uses: actions/checkout@v4
+        with:
+          repository: triovative-bot/daypredict   # 🔄 Replace with your repo
+          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          path: website
+
+      - name: Archive Website Code
+        run: |
+          tar -czf website.tar.gz -C website .
+
+      - name: Upload Website Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-code
+          path: website.tar.gz
+
+  deploy:
+    name: Deploy Stage - Transfer to XAMPP Server
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download Website Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: website-code
+          path: .
+
+      - name: Extract Artifact
+        run: |
+          tar -xzf website.tar.gz
+
+      - name: Copy Files to XAMPP Server via SSH
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          scp -i private_key.pem -o StrictHostKeyChecking=no -r * ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }}:/opt/lampp/htdocs/
+
+      - name: Restart XAMPP Apache Service
+        run: |
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} \
+            "sudo /opt/lampp/lampp restartapache"
+
+  test:
+    name: Test Stage - Validate Website
+    runs-on: self-hosted
+    needs: deploy
+
+    steps:
+      - name: Wait for Web Server
+        run: sleep 10
+
+      - name: Test Website URL
+        run: |
+          curl -I http://${{ secrets.SERVER_IP }} | grep "200 OK" || exit 1
