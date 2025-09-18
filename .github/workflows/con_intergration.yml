@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build Stage - Checkout Repositories
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout Repo A (CI pipeline repo)
