@@ -53,7 +53,7 @@ jobs:
 
       - name: Copy Files to XAMPP Server via SSH
         run: |
-          echo "${{ secrets.SERVER_SSH_KEY }}" > private_key.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
           scp -i private_key.pem -o StrictHostKeyChecking=no -r * ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/lampp/htdocs/
 
