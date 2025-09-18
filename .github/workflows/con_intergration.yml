@@ -55,11 +55,12 @@ jobs:
           echo "${{ secrets.SERVER_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
           scp -i private_key.pem -o StrictHostKeyChecking=no -r * ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/lampp/htdocs/
+          mv /opt/lampp/htdocs/website/* /opt/lampp/htdocs/
 
       - name: Restart Apache in XAMPP
         run: |
           ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} \
-            "sudo /opt/lampp/lampp restartapache"
+            "/opt/lampp/lampp restartapache"
 
   test:
     name: Test Stage - Validate Website
