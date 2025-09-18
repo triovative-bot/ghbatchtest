@@ -1,24 +1,25 @@
 name: CI for XAMPP Web Server
 
 on:
-  push:
-    branches: [ "main" ]
+#  push:
+#    branches: [ "main" ]
   workflow_dispatch:   # allow manual trigger
+    branches: [ "main" ]
 
 jobs:
   build:
     name: Build Stage - Checkout Repositories
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repo A (CI pipeline repo)
         uses: actions/checkout@v3
 
-      - name: Checkout Repo B (private via GitHub deploy key)
+      - name: Checkout Website Code Repo (Private)
         uses: actions/checkout@v3
         with:
-          repository: triovative-bot/daypredict
-          ssh-key: ${{ secrets.GH_DEPLOY_KEY }}   # 👈 deploy key for GitHub
+          repository: triovative-bot/daypredict   # 🔄 Replace with your repo
+          ssh-key: ${{ secrets.GH_DEPLOY_KEY }}
           ref: main
           path: .
           persist-credentials: false
@@ -36,7 +37,7 @@ jobs:
 
   deploy:
     name: Deploy Stage - Transfer to XAMPP Server
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: build
 
     steps:
@@ -55,16 +56,15 @@ jobs:
           echo "${{ secrets.SERVER_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
           scp -i private_key.pem -o StrictHostKeyChecking=no -r * ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/lampp/htdocs/
-      - name: Deploy and restart Apache
-        run: |
-          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} \
-          "sudo mv -i /opt/lampp/htdocs/website/* /opt/lampp/htdocs/ && \
-           sudo /opt/lampp/lampp restartapache"
 
+      - name: Restart XAMPP Apache Service
+        run: |
+          ssh -i private_key.pem -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} \
+            "sudo mv -i /opt/lampp/htdocs/website/* /opt/lampp/htdocs/ && sudo /opt/lampp/lampp restartapache"
 
   test:
     name: Test Stage - Validate Website
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: deploy
 
     steps:
@@ -73,4 +73,4 @@ jobs:
 
       - name: Test Website URL
         run: |
-          curl -I http://${{ secrets.SERVER_IP }} | grep "200 OK" || exit 1
+          curl -I http://${{ secrets.HOST }} | grep "200 OK" || exit 1
